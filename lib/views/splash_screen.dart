@@ -4,10 +4,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:my_apps/controllers/LoginController.dart';
 import 'package:my_apps/views/login/login_screen.dart';
 import 'package:my_apps/views/home/home_screen.dart';
 import 'package:my_apps/main.dart'; // AppData
+import 'package:get_storage/get_storage.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -17,6 +17,7 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  final boxStorage = GetStorage();
 
   @override
   void initState() {
@@ -34,9 +35,12 @@ class _SplashScreenState extends State<SplashScreen> {
 
     // jika server OK, delay sebentar baru navigasi
     Future.delayed(const Duration(seconds: 2), () {
-      final isLoggedIn = false; // bisa ambil dari storage/GetStorage
+      final boxStorage = GetStorage();
+
+      final bool isLoggedIn = boxStorage.read('isLogin') ?? false;
+
       if (isLoggedIn) {
-        Get.offAll(() => const HomePage(),
+          Get.offAll(() =>  HomeScreen(),
             transition: Transition.fadeIn,
             duration: const Duration(milliseconds: 800));
       } else {
@@ -57,7 +61,6 @@ class _SplashScreenState extends State<SplashScreen> {
       final res = await http
           .get(Uri.parse("http://10.8.12.68:88/myflutterapi/ping"))
           .timeout(const Duration(seconds: 5));
-      print(res);
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body);
         return data["status"] == "ok";
@@ -101,7 +104,7 @@ class _SplashScreenState extends State<SplashScreen> {
             colors: [
               Colors.green.shade900,
               Colors.green.shade700,
-              Colors.green.shade400,
+              Colors.green.shade500,
             ],
           ),
         ),
@@ -126,7 +129,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   ),
                 )
               else
-                const FlutterLogo(size: 100),
+                Text(""),
               const SizedBox(height: 20),
               const CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),

@@ -38,14 +38,14 @@ class MyApp extends StatelessWidget {
       getPages: [
         GetPage(name: "/splash", page: () => SplashScreen()),
         GetPage(name: "/login", page: () => LoginScreen()),
-        GetPage(name: "/home", page: () => HomePage()),
+        GetPage(name: "/home", page: () => HomeScreen()),
       ],
       darkTheme: ThemeData(
         brightness: Brightness.dark,
         primarySwatch: Colors.lightGreen,
       ),
       themeMode: ThemeMode.dark,
-      home: isLogIn ? const HomePage() : LoginScreen(),
+      home: isLogIn ? HomeScreen() : LoginScreen(),
     );
   }
 }

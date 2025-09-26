@@ -43,7 +43,7 @@ class LoginController extends GetxController {
               boxStorage.write("nama_panggilan", data['data']['nama_panggilan']);
               boxStorage.write("email", data['data']['email']);
               boxStorage.write("isLogin", true);
-              Get.offAll(() => const HomePage());// langsung ke main.dart
+              Get.offAll(() => HomeScreen());// langsung ke main.dart
         } else {
           FocusScope.of(Get.context!).requestFocus(usernameFocus);
           Get.snackbar("Login Gagal", data["message"] ?? "Coba lagi");

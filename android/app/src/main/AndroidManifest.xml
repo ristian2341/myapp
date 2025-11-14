@@ -2,7 +2,7 @@
     <application
         android:label="Monitoring Keuangan"
         android:name="Monitoring Keuangan"
-        android:icon="http://10.8.12.68:88/myflutterapi/image/logo.png">
+        android:icon="http://10.8.103.6:88/myflutterapi/image/logo.png">
         <activity
             android:name=".MainActivity"
             android:exported="true"

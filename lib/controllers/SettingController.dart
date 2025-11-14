@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-
 import 'package:my_apps/main.dart';
 
 class SettingController extends GetxController {
@@ -19,7 +18,7 @@ class SettingController extends GetxController {
   Future<void> loadSetting() async {
     try {
       final res = await http.get(
-        Uri.parse("http://10.8.12.68:88/myflutterapi/setting"),
+        Uri.parse("${AppData.base_url}/setting"),
       );
 
       if (res.statusCode == 200) {

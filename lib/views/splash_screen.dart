@@ -53,13 +53,14 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<bool> _pingServer() async {
     try {
+      final boxStorage = GetStorage();
       // cek internet
       final result = await InternetAddress.lookup('google.com');
       if (result.isEmpty || result[0].rawAddress.isEmpty) return false;
 
       // ping server
       final res = await http
-          .get(Uri.parse("http://10.8.12.68:88/myflutterapi/ping"))
+          .get(Uri.parse("${AppData.base_url}/ping"))
           .timeout(const Duration(seconds: 5));
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body);

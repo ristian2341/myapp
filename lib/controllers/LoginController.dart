@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:get_storage/get_storage.dart';
 import 'package:my_apps/views/home/home_screen.dart';
+import 'package:my_apps/main.dart'; // AppData
 
 class LoginController extends GetxController {
   var isLoading = false.obs;
@@ -23,7 +24,7 @@ class LoginController extends GetxController {
     isLoading.value = true;
     try {
       final res = await http.post(
-        Uri.parse("http://10.8.12.68:88/myflutterapi/users/login"),
+        Uri.parse("${AppData.base_url}/users/login"),
         body: {
           "user_name": emailController.text,
           "password": passController.text,
@@ -33,8 +34,6 @@ class LoginController extends GetxController {
       var data = jsonDecode(res.body);
       if (data['statusCode'] == 200) {
         if (data['data']['username'] == emailController.text) {
-              emailController.clear();
-              passController.clear();
               boxStorage.write("username", data['data']['username']);
               boxStorage.write("code_user", data['data']['code']);
               boxStorage.write("access_token", data['data']['access_token']);
@@ -42,7 +41,11 @@ class LoginController extends GetxController {
               boxStorage.write("supervisor", data['data']['supervisor']);
               boxStorage.write("nama_panggilan", data['data']['nama_panggilan']);
               boxStorage.write("email", data['data']['email']);
+              boxStorage.write("password", passController.text);
+              boxStorage.write("photoProfile", data['data']['photo_profile']);
               boxStorage.write("isLogin", true);
+              emailController.clear();
+              passController.clear();
               Get.offAll(() => HomeScreen());// langsung ke main.dart
         } else {
           FocusScope.of(Get.context!).requestFocus(usernameFocus);
@@ -53,7 +56,7 @@ class LoginController extends GetxController {
         Get.snackbar("Login Gagal", data["message"] ?? "Coba lagi");
       }
     } catch (e) {
-      debugPrint("❌ Error umum: $e");
+      print("❌ Error umum: $e");
     } finally {
       isLoading.value = false;
     }

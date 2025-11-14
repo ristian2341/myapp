@@ -1,62 +1,115 @@
-import 'package:animate_do/animate_do.dart';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:animate_do/animate_do.dart';
 import 'package:my_apps/controllers/ProfileController.dart';
+import 'package:flutter/foundation.dart';
+import 'package:my_apps/widgets/form_widget.dart';
 
-class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
-
-  @override
-  State<ProfileScreen> createState() => _ProfileScreenStated();
-}
-
-class _ProfileScreenStated extends State<ProfileScreen> {
+class ProfileScreen extends StatelessWidget {
+  ProfileScreen({super.key});
   final ProfileController c = Get.put(ProfileController());
-  bool _isLoading = false;
 
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required String hint,
-    bool isPassword = false,
-    bool readOnly = false,   // 👈 default false
-    bool enabled = true,     // 👈 default true
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: TextField(
-        controller: controller,
-        obscureText: isPassword,
-        readOnly: readOnly,
-        enabled: enabled,
-        style: const TextStyle(
-          fontSize: 16.0,
-          color: Colors.black87,
-          fontStyle: FontStyle.italic,
-        ),
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: const TextStyle( // 👈 label warna hitam
-            color: Colors.black87,
-            fontWeight: FontWeight.w600,
+  void _showImagePicker() {
+    final bool canUseCamera = !kIsWeb &&
+        (Platform.isAndroid || Platform.isIOS);
+
+    Get.bottomSheet(
+      Center(
+        child: Container(
+          width: 300,
+          decoration: BoxDecoration(
+            color: Colors.grey[900],
+            borderRadius: BorderRadius.circular(20),
           ),
-          hintText: hint,
-          hintStyle: const TextStyle( // 👈 hint abu-abu
-            color: Colors.grey,
-            fontSize: 14,
-          ),
-          filled: true,
-          fillColor: Colors.grey.shade100,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey.shade300),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.green.shade600, width: 2),
+          padding: const EdgeInsets.all(10),
+          child: Wrap(
+            children: [
+              if (canUseCamera)
+                ListTile(
+                  leading: const Icon(Icons.camera_alt, color: Colors.white),
+                  title: const Text('Camera', style: TextStyle(color: Colors.white)),
+                  onTap: () {
+                    c.pickImage(fromCamera: true);
+                    Get.back();
+                  },
+                ),
+              ListTile(
+                leading: const Icon(Icons.photo, color: Colors.white),
+                title: const Text('Gallery', style: TextStyle(color: Colors.white)),
+                onTap: () {
+                  c.pickImage(fromCamera: false);
+                  Get.back();
+                },
+              ),
+            ],
           ),
         ),
       ),
+      backgroundColor: Colors.transparent,
+      isDismissible: true,
+    );
+  }
+
+
+  void openProfileImagePicker() {
+    Get.dialog(
+      Center(
+        child: Container(
+          width: 300, // lebar kotak
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade900,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                "Pilih Sumber Foto",
+                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              if (!kIsWeb && (Platform.isAndroid || Platform.isIOS))
+                Column(
+                  children: [
+                    ListTile(
+                      leading: const Icon(Icons.camera_alt, color: Colors.white),
+                      title: const Text("Camera", style: TextStyle(color: Colors.white)),
+                      onTap: () {
+                        c.pickImage(fromCamera: true);
+                        Get.back();
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.photo, color: Colors.white),
+                      title: const Text("Gallery", style: TextStyle(color: Colors.white)),
+                      onTap: () {
+                        c.pickImage(fromCamera: false);
+                        Get.back();
+                      },
+                    ),
+                  ],
+                ),
+              if (kIsWeb || Platform.isWindows || Platform.isLinux || Platform.isMacOS)
+                ListTile(
+                  leading: const Icon(Icons.photo, color: Colors.white),
+                  title: const Text("Gallery", style: TextStyle(color: Colors.white)),
+                  onTap: () {
+                    c.pickImage(fromCamera: false);
+                    Get.back();
+                  },
+                ),
+              const SizedBox(height: 5),
+              TextButton(
+                onPressed: () => Get.back(),
+                child: const Text("Batal", style: TextStyle(color: Colors.redAccent)),
+              ),
+            ],
+          ),
+        ),
+      ),
+      barrierDismissible: true,
     );
   }
 
@@ -66,238 +119,208 @@ class _ProfileScreenStated extends State<ProfileScreen> {
       body: Container(
         width: double.infinity,
         decoration: BoxDecoration(
-          gradient: LinearGradient(begin: Alignment.topCenter, colors: [
-            Colors.green.shade900,
-            Colors.green.shade700,
-            Colors.green.shade400
-          ]),
+          gradient: LinearGradient(
+            colors: [Colors.green.shade900, Colors.green.shade700, Colors.green.shade400],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
         ),
         child: Column(
           children: [
-            const SizedBox(height: 50),
-            // 🔹 Foto profil + label
+            const SizedBox(height: 10),
+
+            // Back button + title
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Row(
+                children: [
+                  IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      onPressed: () => Navigator.pop(context)),
+                  const SizedBox(width: 8),
+                  const Text("Profile",
+                      style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white)),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            // Avatar
             FadeInDown(
-              duration: const Duration(milliseconds: 800),
-              child: Column(
-                children: const [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundColor: Colors.white,
-                    child: Icon(
-                      Icons.person,
-                      size: 60,
-                      color: Colors.green,
-                    ),
-                  ),
-                  SizedBox(height: 12),
-                  Text(
-                    "Profile",
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      letterSpacing: 1.2,
+              child: Stack(
+                children: [
+                  Obx(() {
+                    if (c.profileImage.value != null) {
+                      return CircleAvatar(
+                        radius: 50,
+                        backgroundImage: FileImage(c.profileImage.value!),
+                      );
+                    } else if (c.profilePhotoUrl.value.isNotEmpty) {
+                      return CircleAvatar(
+                        radius: 50,
+                        backgroundImage: NetworkImage(c.profilePhotoUrl.value),
+                      );
+                    } else {
+                      return const CircleAvatar(
+                        radius: 50,
+                        backgroundColor: Colors.white,
+                        child: Icon(Icons.person, size: 60, color: Colors.green),
+                      );
+                    }
+                  }),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: InkWell(
+                      onTap: () {
+                        Get.bottomSheet(
+                          Center(
+                            child: Container(
+                              width: 300,
+                              decoration: BoxDecoration(
+                                color: Colors.grey[900],
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              padding: const EdgeInsets.all(10),
+                              child: Wrap(
+                                children: [
+                                  ListTile(
+                                    leading: const Icon(Icons.camera_alt, color: Colors.white),
+                                    title: const Text('Camera', style: TextStyle(color: Colors.white)),
+                                    onTap: () {
+                                      c.pickImage(fromCamera: true);
+                                      Get.back();
+                                    },
+                                  ),
+                                  ListTile(
+                                    leading: const Icon(Icons.photo, color: Colors.white),
+                                    title: const Text('Gallery', style: TextStyle(color: Colors.white)),
+                                    onTap: () {
+                                      c.pickImage(fromCamera: false);
+                                      Get.back();
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          backgroundColor: Colors.transparent,
+                          isDismissible: true,
+                        );
+                      },
+                      child: const CircleAvatar(
+                        radius: 18,
+                        backgroundColor: Colors.white,
+                        child: Icon(Icons.camera_alt, size: 20, color: Colors.green),
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
+
             const SizedBox(height: 20),
+
+            // Form
             Expanded(
               child: Container(
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(25),
-                    topRight: Radius.circular(25),
-                  ),
+                      topLeft: Radius.circular(25), topRight: Radius.circular(25)),
                 ),
                 child: Padding(
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+                  padding: const EdgeInsets.all(20),
                   child: SingleChildScrollView(
                     child: Column(
-                      children: <Widget>[
-                        _buildTextField(
-                          controller: c.usernameController,
-                          label: "Username",
-                          hint: "Masukkan Username",
-                          readOnly: true,
+                      children: [
+                        buildTextField(
+                            controller: c.usernameController,
+                            label: "Username",
+                            hint: "Masukkan Username",
+                            readOnly: true),
+                        buildTextField(
+                            controller: c.emailController,
+                            label: "Email",
+                            hint: "Masukkan Email",
                         ),
-                        _buildTextField(
-                          controller: c.emailController,
-                          label: "Email",
-                          hint: "Masukkan Email",
+                        buildTextField(
+                            controller: c.namaPanggilanController,
+                            label: "Nama Panggilan",
+                            hint: "Masukkan Nama Panggilan"),
+                        buildTextField(
+                            controller: c.namaLengkapController,
+                            label: "Nama Lengkap",
+                            hint: "Nama Lengkap"),
+                        buildDateField(
+                            controller: c.tglLahirController,
+                            label: "Tanggal Lahir",
+                            hint: "Tanggal Lahir",
+                            context: context,
                         ),
-                        _buildTextField(
-                          controller: c.namaPanggilanController,
-                          label: "Nama Panggilan",
-                          hint: "Masukkan Nama Panggilan",
-                        ),
-                        _buildTextField(
-                          controller: c.namaLengkapController,
-                          label: "Nama Lengkap",
-                          hint: "Nama Lengkap",
-                        ),
-                        _buildTextField(
-                          controller: c.phoneController,
-                          label: "Nomor HP",
-                          hint: "Masukkan Nomor HP",
-                        ),
-                        _buildTextField(
-                          controller: c.alamatController,
-                          label: "Alamat",
-                          hint: "Alamat",
-                        ),
-                        _buildTextField(
-                          controller: c.kotaController,
-                          label: "Kota",
-                          hint: "Kota",
-                        ),
-                        _buildTextField(
-                          controller: c.propinsiController,
-                          label: "Propinsi",
-                          hint: "Propinsi",
-                        ),
-                        _buildTextField(
-                          controller: c.facebookController,
-                          label: "Facebook",
-                          hint: "Facebook",
-                        ),
-                        _buildTextField(
-                          controller: c.instagramController,
-                          label: "Instagram",
-                          hint: "Instagram",
-                        ),
-                        _buildTextField(
-                          controller: c.tiktokController,
-                          label: "Titok",
-                          hint: "Titok",
-                        ),
-                        const SizedBox(height: 30),
-                        FadeInUp(
-                          duration: const Duration(milliseconds: 1600),
-                          child: Column(
-                            children: [
-                              // tombol save
-                              SizedBox(
-                                width: double.infinity,
-                                height: 55,
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.green[600],
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                  onPressed: _isLoading
-                                      ? null
-                                      : () async {
-                                    setState(() => _isLoading = true);
-                                    try {
-                                        c.clearFields();
-                                      Get.snackbar("Sukses",
-                                          "Registrasi berhasil",
-                                          snackPosition:
-                                          SnackPosition.BOTTOM,
-                                          backgroundColor: Colors.green
-                                              .withOpacity(0.7),
-                                          colorText: Colors.white);
-                                    } catch (e) {
-                                      Get.snackbar(
-                                          "Error", "Gagal register: $e",
-                                          snackPosition:
-                                          SnackPosition.BOTTOM,
-                                          backgroundColor: Colors.red
-                                              .withOpacity(0.7),
-                                          colorText: Colors.white);
-                                    } finally {
-                                      setState(() => _isLoading = false);
-                                    }
-                                  },
-                                  child: _isLoading
-                                      ? const CircularProgressIndicator(
-                                    color: Colors.white,
-                                  )
-                                      : const Text(
-                                    "Save",
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white),
-                                  ),
+                        Obx(() => buildOptionBox(
+                          label: "Jenis Kelamin",
+                          options: c.genderOptions,
+                          groupValue: c.jenKel.value,   // <- wajib pakai .value, karena RxString
+                          onChanged: (val) {
+                            if (val != null) {
+                              c.jenKel.value = val;
+                              c.jenKelController.text = val;
+                            }
+                          },
+                        )),
+                        buildTextField(
+                            controller: c.phoneController,
+                            label: "Nomor HP",
+                            hint: "Masukkan Nomor HP"),
+                        buildTextField(
+                            controller: c.alamatController, label: "Alamat", hint: "Alamat"),
+                        buildTextField(controller: c.kotaController, label: "Kota", hint: "Kota"),
+                        buildTextField(
+                            controller: c.propinsiController, label: "Propinsi", hint: "Propinsi"),
+                        buildTextField(
+                            controller: c.facebookController, label: "Facebook", hint: "Facebook"),
+                        buildTextField(
+                            controller: c.instagramController, label: "Instagram", hint: "Instagram"),
+                        buildTextField(
+                            controller: c.tiktokController, label: "TikTok", hint: "TikTok"),
+                        const SizedBox(height: 20),
+                        Obx(() {
+                          return SizedBox(
+                            width: double.infinity,
+                            height: 55,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.orange[900], // 🔹 ubah warna jadi orange
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
-                              const SizedBox(height: 15),
-                              // tombol clear
-                              SizedBox(
-                                width: double.infinity,
-                                height: 50,
-                                child: OutlinedButton(
-                                  style: OutlinedButton.styleFrom(
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    side: BorderSide(color: Colors.green[600]!),
-                                  ),
-                                  onPressed: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (ctx) => AlertDialog(
-                                        title: const Text("Konfirmasi"),
-                                        content: const Text(
-                                            "Apakah Anda yakin ingin menghapus semua input?"),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () =>
-                                                Navigator.of(ctx).pop(),
-                                            child: const Text("Batal"),
-                                          ),
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.of(ctx).pop();
-                                              c.clearFields();
-                                              Get.snackbar(
-                                                "Cleared",
-                                                "Semua field sudah dikosongkan",
-                                                snackPosition:
-                                                SnackPosition.BOTTOM,
-                                                backgroundColor: Colors.orange
-                                                    .withOpacity(0.7),
-                                                colorText: Colors.white,
-                                              );
-                                            },
-                                            child: const Text(
-                                              "Ya",
-                                              style:
-                                              TextStyle(color: Colors.red),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                  child: const Text(
-                                    "Clear Fields",
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.green),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                              onPressed: c.isLoading.value ? null : c.updateUserProfile,
+                              child: c.isLoading.value
+                                  ? const CircularProgressIndicator(color: Colors.white)
+                                  : const Text("Save",
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black54)),
+                            ),
+                          );
+                        }),
                       ],
                     ),
                   ),
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),
     );
   }
+
 }

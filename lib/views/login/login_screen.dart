@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:my_apps/main.dart';
 import 'package:my_apps/views/login/register_screen.dart';
 import 'package:my_apps/controllers/LoginController.dart';
+import 'package:my_apps/views/login/forgotPassword_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
@@ -234,7 +235,9 @@ class LoginScreen extends StatelessWidget {
                           const SizedBox(width: 30),
                           Expanded(
                             child: MaterialButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                Get.to(() => const ForgotPasswordScreen());
+                              },
                               height: 50,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(50),

@@ -37,20 +37,20 @@ class User {
 
     factory User.fromJson(Map<String,dynamic> json) {
         return User(
-            code : json['code'] as String?,
-            username : json['username'] as String?,
-            email : json['email'] as String?,
-            nama_panggilan : json['nama_panggilan'] as String?,
-            phone : json['phone'] as String?,
-            password : json['password'] as String?,
-            longitudes : json['longitudes'] as String?,
-            latitude : json['latitude'] as String?,
-            firebase : json['firebase'] as String?,
-            developer : json['developer'] as int?,
-            supervisor : json['supervisor'] as int?,
-            login_at : json['login_at'] as String?,
-            access_token : json['access_token'] as String?,
-            verify_code : json['verify_code'] as String?,
+            code : (json['code'] ?? '') as String,
+            username : (json['username'] ?? '') as String,
+            email : (json['email'] ?? '') as String,
+            nama_panggilan : (json['nama_panggilan'] ?? '') as String,
+            phone : (json['phone'] ??  '') as String,
+            password : (json['password'] ?? '') as String,
+            longitudes : (json['longitudes'] ?? '') as String,
+            latitude : (json['latitude'] ?? '') as String,
+            firebase : (json['firebase'] ?? '') as String,
+            developer : (json['developer'] ?? 0) as int,
+            supervisor : (json['supervisor'] ?? 0) as int,
+            login_at : (json['login_at'] ?? '') as String,
+            access_token : (json['access_token'] ?? '') as String,
+            verify_code : (json['verify_code'] ?? '') as String,
         );
     }
 

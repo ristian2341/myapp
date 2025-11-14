@@ -2,6 +2,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:my_apps/main.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -13,11 +14,12 @@ class _RegisterScreenStated extends State<RegisterScreen> {
   Future<void> registerUser(String username, String email, String phone,
       String namaPanggilan, String password) async {
     final respond = await http.post(
-      Uri.parse("http://10.8.12.68:88/myflutterapi/users/registers"),
+      Uri.parse("${AppData.base_url}/users/registers"),
       body: {
         'username': username,
         'email': email,
         'phone': phone,
+        'nama_panggilan': namaPanggilan,
         'nama_panggilan': namaPanggilan,
         'password': password
       },
@@ -101,7 +103,7 @@ class _RegisterScreenStated extends State<RegisterScreen> {
         ),
         child: Column(
           children: [
-            const SizedBox(height: 40),
+            const SizedBox(height: 10),
             Padding(
               padding: const EdgeInsets.all(20),
               child: Row(

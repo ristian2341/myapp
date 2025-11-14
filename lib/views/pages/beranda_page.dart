@@ -17,15 +17,24 @@ class _BerandaPageState extends State<BerandaPage> {
   ];
 
   int index = 0;
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
-    Timer.periodic(const Duration(seconds: 4), (timer) {
-      setState(() {
-        index = (index + 1) % gradientColors.length;
-      });
+    _timer = Timer.periodic(const Duration(seconds: 4), (timer) {
+      if (mounted) { // cek dulu widget masih hidup
+        setState(() {
+          index = (index + 1) % gradientColors.length;
+        });
+      }
     });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel(); // hentikan timer
+    super.dispose();
   }
 
   @override
@@ -41,7 +50,7 @@ class _BerandaPageState extends State<BerandaPage> {
       ),
       child: const Center(
         child: Text(
-          "Beranda",
+          "aeeeeehhhhheee",
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,

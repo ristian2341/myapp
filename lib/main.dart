@@ -5,12 +5,18 @@ import 'package:my_apps/views/login/login_screen.dart';
 import 'package:my_apps/views/home/home_screen.dart';
 import 'package:my_apps/views/splash_screen.dart';
 import 'package:my_apps/controllers/SettingController.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AppData {
+  await dotenv.load(fileName: ".env");
+
   static String instansi = "";
   static String namaAplikasi = "";
   static String logoApp = "";
   static String iconApp = "";
+  static String base_url = dotenv.env['API_URL'];
 }
 
 void main() async {
@@ -22,11 +28,12 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     final boxStorage = GetStorage();
+
+    checkLogin();
     bool isLogIn = boxStorage.read("isLogin") ?? false;
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
@@ -45,7 +52,8 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.lightGreen,
       ),
       themeMode: ThemeMode.dark,
-      home: isLogIn ? HomeScreen() : LoginScreen(),
+      // home: isLogIn ? HomeScreen() : LoginScreen(),
+      home : MainLayout(),
     );
   }
 }
@@ -135,3 +143,165 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
+
+Future<void> checkLogin() async {
+  final boxStorage = GetStorage();
+
+  final res = await http.post(
+    Uri.parse("${AppData.base_url}/users/login"),
+    body: {
+      "user_name": boxStorage.read("username"),
+      "password": boxStorage.read("password"),
+    },
+  );
+  var data = jsonDecode(res.body);
+
+  if (data['statusCode'] == 200) {
+      if(data['data']['username'] != boxStorage.read("username")){
+          Logout();
+      }else{
+        boxStorage.write("username", data['data']['username']);
+        boxStorage.write("code_user", data['data']['code']);
+        boxStorage.write("access_token", data['data']['access_token']);
+        boxStorage.write("developer", data['data']['developer']);
+        boxStorage.write("supervisor", data['data']['supervisor']);
+        boxStorage.write("nama_panggilan", data['data']['nama_panggilan']);
+        boxStorage.write("email", data['data']['email']);
+        boxStorage.write("password", boxStorage.read("password"));
+        boxStorage.write("photoProfile", data['data']['photo_profile']);
+      }
+  } else {
+    Logout();
+  }
+}
+
+Future<void> Logout() async {
+  final boxStorage = GetStorage();
+  Get.snackbar("Logout", "Ada perubahan akun harap login terlebih dahulu");
+  boxStorage.write("isLogin", false); // hapus session
+  boxStorage.remove("username");
+  boxStorage.remove("code_user");
+  boxStorage.remove("access_token");
+  boxStorage.remove("developer");
+  boxStorage.remove("supervisor");
+  boxStorage.remove("nama_panggilan");
+  boxStorage.remove("email");
+  boxStorage.remove("photoProfile");
+  Get.offAllNamed("/login");
+}
+
+
+
+/// Struktur menu
+class MenuItem {
+  final IconData icon;
+  final IconData selectedIcon;
+  final String label;
+  final Widget page;
+
+  MenuItem({
+    required this.icon,
+    required this.selectedIcon,
+    required this.label,
+    required this.page,
+  });
+}
+
+class MainLayout extends StatefulWidget {
+  @override
+  _MainLayoutState createState() => _MainLayoutState();
+}
+
+class _MainLayoutState extends State<MainLayout> {
+  int _selectedIndex = 0;
+
+  /// Daftar menu (bisa ambil dari API juga)
+  final List<MenuItem> menuItems = [
+    MenuItem(
+      icon: Icons.dashboard_outlined,
+      selectedIcon: Icons.dashboard,
+      label: "Dashboard",
+      page: DashboardPage(),
+    ),
+    MenuItem(
+      icon: Icons.people_outline,
+      selectedIcon: Icons.people,
+      label: "Siswa",
+      page: SiswaPage(),
+    ),
+    MenuItem(
+      icon: Icons.settings_outlined,
+      selectedIcon: Icons.settings,
+      label: "Setting",
+      page: SettingPage(),
+    ),
+  ];
+
+  void _navigateTo(int index) {
+    setState(() => _selectedIndex = index);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Row(
+        children: [
+          /// Sidebar kiri dengan NavigationRail
+          NavigationRail(
+            selectedIndex: _selectedIndex,
+            onDestinationSelected: _navigateTo,
+            labelType: NavigationRailLabelType.all,
+            leading: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: FlutterLogo(size: 40),
+            ),
+            destinations: menuItems
+                .map((item) => NavigationRailDestination(
+              icon: Icon(item.icon),
+              selectedIcon: Icon(item.selectedIcon),
+              label: Text(item.label),
+            ))
+                .toList(),
+          ),
+
+          /// Area konten kanan
+          Expanded(
+            child: menuItems[_selectedIndex].page,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// ====== HALAMAN KONTEN ======
+class DashboardPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("📊 Dashboard")),
+      body: Center(child: Text("Ini halaman Dashboard")),
+    );
+  }
+}
+
+class SiswaPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("👨‍🎓 Data Siswa")),
+      body: Center(child: Text("Ini halaman Siswa")),
+    );
+  }
+}
+
+class SettingPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("⚙️ Setting Aplikasi")),
+      body: Center(child: Text("Ini halaman Setting")),
+    );
+  }
+}
+
